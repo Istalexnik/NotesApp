@@ -1,0 +1,63 @@
+﻿@page "/"
+@using NotesApp.Models
+@inject Services.NoteService NoteService
+@inject NavigationManager NavigationManager
+
+<h3>Notes</h3>
+
+<button @onclick="CreateNewNote" class="btn btn-primary mb-3">Create New Note</button>
+
+@if (notes != null && notes.Any())
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Date Created</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var note in notes)
+            {
+                <tr>
+                    <td>@note.Title</td>
+                    <td>@note.DateCreated.ToString("g")</td>
+                    <td>
+                        <button @onclick="() => EditNote(note.Id)" class="btn btn-warning btn-sm">Edit</button>
+                        <button @onclick="() => DeleteNoteAsync(note.Id)" class="btn btn-danger btn-sm">Delete</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <p>No notes available.</p>
+}
+
+@code {
+    private List<Note> notes = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        notes = await NoteService.GetAllNotesAsync();
+    }
+
+    private async Task DeleteNoteAsync(int id)
+    {
+        await NoteService.DeleteNoteAsync(id);
+        notes = await NoteService.GetAllNotesAsync();
+    }
+
+    private void CreateNewNote()
+    {
+        NavigationManager.NavigateTo("/create-note");
+    }
+
+    private void EditNote(int id)
+    {
+        NavigationManager.NavigateTo($"/edit-note/{id}");
+    }
+}

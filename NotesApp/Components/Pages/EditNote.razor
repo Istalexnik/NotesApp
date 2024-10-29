@@ -1,0 +1,61 @@
+﻿@page "/edit-note/{id:int}"
+@inject NotesApp.Services.NoteService NoteService
+@inject NavigationManager NavigationManager
+@using NotesApp.Models
+
+<h3>Edit Note</h3>
+
+@if (note != null)
+{
+    <div class="form-group">
+        <label>Title</label>
+        <input @bind="note.Title" class="form-control" />
+    </div>
+    <div class="form-group">
+        <label>Content</label>
+        <textarea @bind="note.Content" class="form-control"></textarea>
+    </div>
+
+    <button @onclick="SaveNoteAsync" class="btn btn-primary">Save</button>
+    <button @onclick="NavigateBack" class="btn btn-secondary ml-2">Back</button>
+}
+else
+{
+    <p>Loading note...</p>
+}
+
+@code {
+    [Parameter]
+    public int id { get; set; } // ID of the note to edit
+
+    private Note? note;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Fetch the note to edit by its ID
+        note = (await NoteService.GetAllNotesAsync()).FirstOrDefault(n => n.Id == id);
+
+        if (note == null)
+        {
+            // Navigate back if note is not found
+            NavigationManager.NavigateTo("/");
+        }
+    }
+
+    private async Task SaveNoteAsync()
+    {
+        if (note != null)
+        {
+            // Update the note using NoteService
+            await NoteService.UpdateNoteAsync(note.Id, note.Title, note.Content);
+
+            // Navigate back to the notes list
+            NavigationManager.NavigateTo("/");
+        }
+    }
+
+    private void NavigateBack()
+    {
+        NavigationManager.NavigateTo("/");
+    }
+}
