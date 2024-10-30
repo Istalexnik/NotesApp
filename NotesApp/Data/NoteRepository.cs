@@ -19,7 +19,7 @@ public class NoteRepository
         await connection.OpenAsync();
 
         var command = connection.CreateCommand();
-        command.CommandText = "SELECT Id, Title, Content, DateCreated FROM Notes";
+        command.CommandText = "SELECT Id, Title, Content, DateCreated FROM Notes ORDER BY DateCreated DESC";
 
         using var reader = await command.ExecuteReaderAsync();
         while (await reader.ReadAsync())
@@ -76,4 +76,23 @@ public class NoteRepository
 
         await command.ExecuteNonQueryAsync();
     }
+
+    public async Task<bool> TitleExistsAsync(string title, int? id = null)
+    {
+        using var connection = new SqliteConnection($"Data Source={DatabaseConfig.DatabasePath}");
+        await connection.OpenAsync();
+
+        var command = connection.CreateCommand();
+        command.CommandText = id == null
+            ? "SELECT COUNT(*) FROM Notes WHERE Title = $title"
+            : "SELECT COUNT(*) FROM Notes WHERE Title = $title AND Id != $id";
+
+        command.Parameters.AddWithValue("$title", title);
+        if (id != null)
+            command.Parameters.AddWithValue("$id", id);
+
+        var count = (long)(await command.ExecuteScalarAsync() ?? 0);
+        return count > 0;
+    }
+
 }

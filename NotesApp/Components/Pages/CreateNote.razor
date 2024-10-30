@@ -1,6 +1,6 @@
 ﻿@page "/create-note"
 @using NotesApp.Models
-@inject NotesApp.Services.NoteService NoteService
+@inject NotesApp.Data.NoteRepository NoteRepository
 @inject NavigationManager NavigationManager
 
 <h3>Create New Note</h3>
@@ -17,15 +17,34 @@
 <button @onclick="SaveNoteAsync" class="btn btn-primary">Save</button>
 <button @onclick="NavigateBack" class="btn btn-secondary ml-2">Back</button>
 
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+    <p class="text-danger">@errorMessage</p>
+}
+
 @code {
     private Note newNote = new Note();
+    private string? errorMessage;
 
     private async Task SaveNoteAsync()
     {
-        // Call the service to add a new note
-        await NoteService.AddNoteAsync(newNote.Title, newNote.Content);
+        // Check for empty title
+        if (string.IsNullOrWhiteSpace(newNote.Title))
+        {
+            errorMessage = "Title cannot be empty.";
+            return;
+        }
 
-        // Navigate back to the notes list after saving
+        // Check if title already exists
+        if (await NoteRepository.TitleExistsAsync(newNote.Title))
+        {
+            errorMessage = "A note with this title already exists.";
+            return;
+        }
+
+        newNote.DateCreated = DateTime.Now;
+        await NoteRepository.AddNoteAsync(newNote);
+
         NavigationManager.NavigateTo("/");
     }
 

@@ -1,6 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
 using NotesApp.Data;
-using NotesApp.Services;
 
 namespace NotesApp
 {
@@ -23,7 +22,6 @@ namespace NotesApp
     		builder.Logging.AddDebug();
 #endif
             builder.Services.AddSingleton<NoteRepository>();
-            builder.Services.AddSingleton<NoteService>();
 
             return builder.Build();
         }
