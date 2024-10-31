@@ -1,6 +1,6 @@
 ﻿@page "/"
 @using NotesApp.Models
-@inject NotesApp.Data.NoteRepository NoteRepository
+@inject NotesApp.Services.NoteService NoteService
 @inject NavigationManager NavigationManager
 
 <h3>Notes</h3>
@@ -21,12 +21,7 @@
             @foreach (var note in notes)
             {
                 <tr>
-                    <td>
-                        <!-- Make the title clickable to navigate to the edit page -->
-                        <a href="#" @onclick="() => EditNote(note.Id)" style="cursor: pointer; text-decoration: underline;">
-                            @note.Title
-                        </a>
-                    </td>
+                    <td @onclick="() => EditNote(note.Id)" style="cursor: pointer;">@note.Title</td>
                     <td>@note.DateCreated.ToString("g")</td>
                     <td>
                         <button @onclick="() => DeleteNoteAsync(note.Id)" class="btn btn-danger btn-sm">Delete</button>
@@ -46,13 +41,13 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        notes = await NoteRepository.GetNotesAsync();
+        notes = await NoteService.GetAllNotesAsync();
     }
 
     private async Task DeleteNoteAsync(int id)
     {
-        await NoteRepository.DeleteNoteAsync(id);
-        notes = await NoteRepository.GetNotesAsync();
+        await NoteService.DeleteNoteAsync(id);
+        notes = await NoteService.GetAllNotesAsync();
     }
 
     private void CreateNewNote()

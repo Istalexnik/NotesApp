@@ -1,5 +1,5 @@
 ﻿@page "/edit-note/{id:int}"
-@inject NotesApp.Data.NoteRepository NoteRepository
+@inject NotesApp.Services.NoteService NoteService
 @inject NavigationManager NavigationManager
 @using NotesApp.Models
 
@@ -18,11 +18,6 @@
 
     <button @onclick="SaveNoteAsync" class="btn btn-primary">Save</button>
     <button @onclick="NavigateBack" class="btn btn-secondary ml-2">Back</button>
-
-    @if (!string.IsNullOrEmpty(errorMessage))
-    {
-        <p class="text-danger">@errorMessage</p>
-    }
 }
 else
 {
@@ -34,11 +29,10 @@ else
     public int id { get; set; }
 
     private Note? note;
-    private string? errorMessage;
 
     protected override async Task OnInitializedAsync()
     {
-        note = (await NoteRepository.GetNotesAsync()).FirstOrDefault(n => n.Id == id);
+        note = (await NoteService.GetAllNotesAsync()).FirstOrDefault(n => n.Id == id);
 
         if (note == null)
         {
@@ -48,25 +42,11 @@ else
 
     private async Task SaveNoteAsync()
     {
-        if (note == null) return;
-
-        // Check for empty title
-        if (string.IsNullOrWhiteSpace(note.Title))
+        if (note != null)
         {
-            errorMessage = "Title cannot be empty.";
-            return;
+            await NoteService.UpdateNoteAsync(note.Id, note.Title, note.Content);
+            NavigationManager.NavigateTo("/");
         }
-
-        // Check if title already exists for other notes
-        if (await NoteRepository.TitleExistsAsync(note.Title, note.Id))
-        {
-            errorMessage = "A note with this title already exists.";
-            return;
-        }
-
-        await NoteRepository.UpdateNoteAsync(note);
-
-        NavigationManager.NavigateTo("/");
     }
 
     private void NavigateBack()
