@@ -11,6 +11,7 @@ namespace NotesApp.Models
         public int Id { get; set; }
         public string Title { get; set; } = string.Empty;
         public string Content { get; set; } = string.Empty;
-        public DateTime DateCreated { get; set; } = DateTime.Now;
+        public DateTime DateCreated { get; set; }
+        public DateTime? EditDate { get; set; } // Nullable, to indicate no edits if it’s null
     }
 }

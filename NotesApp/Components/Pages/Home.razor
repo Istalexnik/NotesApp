@@ -1,5 +1,4 @@
 ﻿@page "/"
-@using NotesApp.Models
 @inject NotesApp.Services.NoteService NoteService
 @inject NavigationManager NavigationManager
 
@@ -9,27 +8,22 @@
 
 @if (notes != null && notes.Any())
 {
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Title</th>
-                <th>Date Created</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var note in notes)
-            {
-                <tr>
-                    <td @onclick="() => EditNote(note.Id)" style="cursor: pointer;">@note.Title</td>
-                    <td>@note.DateCreated.ToString("g")</td>
-                    <td>
-                        <button @onclick="() => DeleteNoteAsync(note.Id)" class="btn btn-danger btn-sm">Delete</button>
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
+    <div style="display: flex; flex-direction: column; gap: 8px;">
+        @foreach (var note in notes)
+        {
+            <div style="display: flex; align-items: center; justify-content: space-between; padding: 8px; border: 1px solid #ddd; border-radius: 4px; width: 100%; box-sizing: border-box;">
+                <!-- Title takes up remaining space and grows -->
+                <span @onclick="() => EditNote(note.Id)" style="flex-grow: 1; cursor: pointer; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                    @note.Title
+                </span>
+
+                <!-- Delete button stays aligned to the right -->
+                <button @onclick="() => DeleteNoteAsync(note.Id)" class="btn btn-danger btn-sm" style="flex-shrink: 0; margin-left: 16px;">
+                    Delete
+                </button>
+            </div>
+        }
+    </div>
 }
 else
 {
